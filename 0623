@@ -1,0 +1,70 @@
+apt_data_2008 <- read.csv("C:/Users/junho/Documents/Nano degree/2008aptdata.csv", 
+                          header = T,)
+                          --------------2008년 아파트 데이터 불러오기
+
+apt_data_2008 <- apt_data_2008[,-c(1:2)]
+--1,2열 삭제
+
+library(tidyverse)
+
+apt_data_2008 <- select(apt_data_2008, X, city, gu, dong, apt, floor,
+                        transaction_real_price, exclusive_use_area,
+                        year_of_completion, transaction_year_month, 
+                        transaction_date)
+--칼럼 순서 변경----------------------
+
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '가리'] = '구로구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '가산'] = '금천구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '갈현'] = '은평구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '개포'] = '강남구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '거여'] = '송파구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '견지'] = '종로구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '고척'] = '구로구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '공덕'] = '마포구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '공릉'] = '노원구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '공항'] = '강서구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '광장'] = '광진구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '구로'] = '구로구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '구산'] = '은평구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '구의'] = '광진구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '군자'] = '광진구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '궁동'] = '구로구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '금호'] = '성동구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '길동'] = '강동구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '길음'] = '성북구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '낙원'] = '종로구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '남가'] = '서대문구'
+
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '남산'] = '중구'
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '남현'] = '관악구'
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '내발'] = '강서구'
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '냉천'] = '서대문구'
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '노고'] = '마포구'
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '노량'] = '동작구'
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '녹번'] = '은평구'
+apt_data_2008$gu[substr(apt_data_2008$dong, 1,2) == '논현'] = '강남구'
+
+
+write.csv(x = apt_data_2008, file = '2008aptdata.csv')
+------------------ 저장-----------
