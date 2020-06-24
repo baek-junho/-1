@@ -1,0 +1,76 @@
+library(tidyverse)
+library(readxl)
+
+getwd()
+###작업 디렉토리 확인하고 MORE 가서 셋 워킹디렉토리 누르기
+
+list.files()
+###작업 디렉토리에 있는 파일을 다 불러옴 너무 많으니깐 뒤에 CSV, xlsx등 써서 찾기
+
+stat <- read_xlsx(path = '2019_KBO_Win.xlsx')
+###파일 불러오기
+
+stat %>%  slice(1:10)
+
+stat %>%  slice(seq(from = 1, to = 300, by = 3))
+stat %>% distinct(팀명)
+stat %>% distinct(팀명, .keep_all = TRUE)
+
+stat %>% filter(홈런 >= 20 & 도루 >= 20)
+stat %>% filter(팀명 == 'SK' & 경기 >= 100) 
+
+stat %>% filter(between(x = 타율, left = 0.330, right = 0.350))
+stat %>%  arrange(desc(x = 경기),desc(x =타석))
+
+stat %>% group_by(팀명) %>% summarise(선수 = n())
+stat %>% group_by(팀명) %>% summarise(팀홈런 = sum(홈런))
+stat %>% group_by(팀명) %>% summarise(최다홈런 = max(홈런))
+
+stat %>% 
+  rename(이름 = 선수명)
+### 이름 변경할때 앞에는 변경후이름 뒤에는 변경전이름 헷갈리지 않기
+
+stat %>% 
+  select(선수명, 출루율, 장타율) %>% 
+  mutate(OPS = 출루율 + 장타율)
+### mutate를 이용해서 새로운 칼럼 생성 
+
+stat %>% 
+  mutate(볼삼비 = round(x= 볼넷 / 삼진, digits= 3L)) %>% 
+  select(선수명,볼넷,삼진,볼삼비)
+
+stat %>% 
+  select(선수명,안타,홈런) %>%
+  filter(안타 >= 100) %>% 
+  mutate(홈런비중 = round(x = 홈런/안타,digits=3L)) %>% 
+  arrange(desc(x = 홈런비중))
+
+stat %>% 
+  select(선수명,타석) %>% 
+  mutate(규정타석 = if_else(condition = 타석 >= 144*3.1,
+                            true = '이상',
+                            false = '미만'))
+
+stat %>% 
+  select(선수명, 홈런) %>% 
+  mutate(타입 = case_when(홈런 >= 20 ~ '거포',
+                          홈런 >= 10 ~ '주전',
+                          홈런 >= 0 ~ '뚝딱이'))
+stat %>% 
+  group_by(팀명) %>% 
+  summarise(인원 = n(),
+              팀홈런 = sum(홈런)) %>% 
+  mutate(평균홈런 = round(x = 팀홈런/인원, digits = 2L))
+
+stat %>% 
+  group_by(팀명) %>% 
+  summarise(인원 = n(),
+              팀별타수 = sum(타수),
+              팀별안타 = sum(안타)) %>% 
+  mutate(팀타율 = round(x = 팀별타수/팀별안타, digits = 2L))
+
+stat %>% 
+  group_by(팀명) %>% 
+  summarise(팀별볼넷 = sum(볼넷),
+                팀별삼진 = sum(삼진)) %>% 
+  mutate(볼삼비 = round(x = 팀별볼넷 / 팀별삼진, digits=3L))
