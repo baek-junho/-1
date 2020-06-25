@@ -1,0 +1,45 @@
+SELECT b.department_name, loc.street_address, loc.country_name
+ FROM departments b
+    ,LATERAL
+    (SELECT l.location_id, l.street_address, c.country_name
+        FROM locations l, countries c
+        WHERE l.country_id = c.country_id
+        AND b.location_id = l.location_id)loc
+        ORDER BY 1;
+        
+ SELECT b.department_name, loc.street_address, loc.country_name
+ FROM departments b
+    ,(SELECT l.location_id, l.street_address, c.country_name
+        FROM locations l, countries c
+        WHERE l.country_id = c.country_id) loc
+        WHERE b.location_id = loc.location_id;
+---------------------퀴즈 2번---------------------------------
+
+SELECT employee_id,
+        job_id, salary
+        FROM employees
+        WHERE (job_id,salary) IN (SELECT job_id, min_salary
+                                    FROM jobs);
+SELECT employee_id,
+        job_id, salary
+        FROM employees a
+        WHERE EXISTS 
+        (SELECT 1
+         FROM jobs b
+         where a.job_id = b.job_id);    
+------------------------퀴즈 3번------------------------
+
+SELECT *
+    FROM departments
+    WHERE department_id NOT IN
+            (SELECT a.department_id
+                FROM employees a
+                );
+                
+SELECT *
+    FROM employees a
+    WHERE department_id NOT IN
+            (SELECT a.department_id
+                FROM employees a
+                );
+-------------------퀴즈4번 못품--------------------------
