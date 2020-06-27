@@ -1,0 +1,124 @@
+## ===
+## Author : junghwan.alfred.yun@gmail.com
+## ===
+
+source("src/check_packages.R")
+vec_installed_packages <- check_packages(c("tidyverse", "tictoc", "pbapply", "parallel", "jsonlite"))
+
+## ===
+### 반복문 작성하기 - for loop ====
+## 92.477 sec elapsed
+
+tictoc::tic()
+list_output <- list()
+for (i in 1:100000){
+  
+  
+  list_output <- append(list_output, list(iris[i,]))
+  
+}
+tictoc::toc() 
+
+
+### 반복문 작성하기 - lapply ====
+## 5.969 sec elapsed
+
+tictoc::tic()
+list_output <- list()
+list_output <- lapply(1:100000,
+                      function(x){
+                        iris[x,]
+                      })
+tictoc::toc()
+
+
+### 반복문 작성하기 - pblapply ====
+## |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=06s  
+
+list_output <- list()
+list_output <- pblapply(1:100000,
+                        function(x){
+                          iris[x,]
+                        })
+
+### 반복문 작성하기 - pblapply - multicore ====
+## 병렬처리 쉽게하기위해서 많이 사용
+
+
+cores <- detectCores()
+cl <- makeCluster(8)
+ 
+clusterEvalQ(cl, {"tidyverse"}) 
+
+list_output <- list()
+list_output <- pblapply(1:1000000,
+                        cl = cl,
+                        function(x){
+                          iris[x,]
+                        })
+stopCluster(cl)
+
+
+
+
+
+
+
+## ===
+### Tidyverse ====
+
+## Base R로 작성한 코드 
+head(arrange(subset(as_tibble(iris),
+                    Species == "setosa"),
+             `Sepal.Length`))
+
+
+## dplyr 예시 1
+iris %>% 
+  as_tibble() %>% 
+  filter(Species == "setosa") %>% 
+  arrange(`Sepal.Length`) %>% 
+  head()
+
+## dplyr 예시 2
+iris %>% 
+  filter(Species == "setosa") %>% 
+  summarise(Species_count = n())
+
+## dplyr 예시 3
+iris %>% 
+  mutate(Species_adj = str_c(Species, "_flower")) %>% 
+  select(-Species)
+
+## dplyr 예시 4
+iris %>% 
+  group_by(Species) %>% 
+  summarise(Sepal_Length_avg = mean(`Sepal.Length`),
+            Sepal_Width_avg = mean(`Sepal.Width`),
+            Petal_Length_avg = mean(`Petal.Length`),
+            Petal_Width_avg = mean(`Petal.Width`))
+
+
+
+## ===
+### json 다루기 - jsonlite() ====
+
+json_iris <- iris %>%
+  toJSON(auto_unbox = T, pretty = T)
+
+write_json(iris,
+           path ="data/iris.json",
+           auto_unbox = T,
+           pretty = T)
+
+tbl_iris <- fromJSON("data/iris.json") %>% 
+  as_tibble()
+
+
+json_input <- '[
+{"Name" : "A", "Age" : 10},
+{"Name" : "B", "Age" : 15, "Occupation" : "Plumber"},
+{"Name" : "C", "Occupation" : "Plumber"}
+]'
+
+fromJSON(json_input)
