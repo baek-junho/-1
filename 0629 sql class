@@ -1,0 +1,50 @@
+select b.department_name, loc.street_address, loc.country_name
+    from departments b,
+    (select l.location_id, l.street_address, c.country_name
+    from locations l , countries c
+    where l.country_id = c.country_id)loc
+    where b.location_id = loc.location_id;
+
+select b.department_name, loc.street_address, loc.country_name
+    from departments b,
+    LATERAL
+    (select l.location_id, l.street_address, c.country_name
+    from locations l , countries c
+    where l.country_id = c.country_id
+    and b.location_id = l.location_id)
+    loc; 
+ 
+ 
+    
+select employee_id,
+job_id, salary
+from employees a
+where exists
+(select 1
+from jobs b
+where a.job_id = b.job_id
+and a.salary = b.min_salary);
+
+select employee_id,
+job_id, salary
+from employees
+where (job_id,salary) in 
+(select job_id, min_salary 
+      from jobs);
+      
+      
+select *
+from departments
+where department_id not in
+        (select a.department_id
+            from employees a);
+            
+            
+
+select *
+from departments
+where department_id not in
+        (select department_id
+            from employees 
+            where department_id is not null
+            
