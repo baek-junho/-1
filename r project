@@ -1,0 +1,20 @@
+tail(sort(graphtest1$시군구))
+graphtest1 <- graphtest1[,-c(1,2)]
+
+graphtest1 %>% group_by(시군구) %>% summarise(강남구)
+
+
+y <- graphtest1[graphtest1$시군구 = 강남구,]
+y <- subset(graphtest1, 시군구 == '강남구')
+quantile(graphtest1$평당가격,probs = c(0.05,0.95)) 
+
+z <- subset(y, 평당가격>=5942.95)
+
+library(dplyr)
+graphtest1 %>% 
+  group_by(graphtest1$시군구) %>% 
+  quantile(graphtest11$평당가격,probs = c(0.05,0.95)) 
+
+ graphtest1 %>% 
+  group_by(시군구) %>%
+  summarize(quantile(평당가격, probs = c(0.05, 0.95)))### 상위 5퍼 하위 5퍼 2008년도꺼 구한것
