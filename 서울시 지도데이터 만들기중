@@ -1,0 +1,58 @@
+install.packages("ggmap")
+install.packages("raster")
+install.packages("rgeos")
+install.packages("maptools")
+install.packages("rgdal")
+
+library(ggmap)
+library(raster)
+library(rgeos)
+library(maptools)
+library(rgdal)
+
+seoul_id <- read.csv("C:/Users/junho/Documents/Nano degree/project/seoul_id.csv")
+x <- apt_data_08vs19
+x$id <- seoul_id$id
+
+seoul_id$시군구명 <- sort(seoul_id$시군구명)
+map <- shapefile("C:/Users/junho/Documents/Nano degree/project/SIG_201703/TL_SCCO_SIG.shp")
+
+
+map <- spTransform(map, CRSobj = CRS('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'))
+
+new_map <- fortify(map, region = 'SIG_CD')
+View(new_map)
+new_map$id <- as.numeric(new_map$id)
+seoul_map <- new_map[new_map$id <= 11740,]
+x_merge <- merge(seoul_map, x, by='id')
+
+
+plot <- ggplot() + geom_polygon(data = x_merge, aes(x = long, y = lat, group=group, fill=gap), color= 'black')
+
+plot + scale_fill_gradient(low = "#ffe5e5", high = "#ff3232", space = "Lab", guide = "colourbar")
+
+
+plot + geom_text(data = x_merge,
+                 aes(x = long,
+                     y = lat,
+                     label = paste(시군구, gap, sep = "\n")))
+
+
+ggplot() + 
+  geom_polygon(data = x_merge, 
+               aes(x = long, 
+                   y = lat, 
+                   group = group, 
+                   fill = gap),
+               color = "white")  +
+  scale_fill_gradient(low = "#FBCF61",
+                      high = "#00CC99",
+                      space = "Lab",
+                      guide = "colourbar") +
+  labs(fill = "구별 gap") +
+  theme_void() +
+  theme(legend.position = c(.0, .10000)) +
+  geom_text(data = x_merge,
+            aes(x = long,
+                y = lat,
+                label = paste(시군구, gap, sep = "\n")))
