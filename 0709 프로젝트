@@ -1,0 +1,155 @@
+age_graph <- apt_data_08vs19_0706[,c(2,5,6, 7:9, 12:17)]
+
+pairs(x = age_graph[2:11]) 
+
+##거래량 어린이수 산점도 그래프
+plot(formula = trans19 ~ 어린이,
+     data = age_graph, pch = 19, col = 'grey60', ylim = c(0,5000)) + 
+  text(x = age_graph$어린이, y = age_graph$trans19, 
+      label = age_graph$시군구, pos = 3, col = 'blue')
+
+plot(formula = 어린이집수 ~ 어린이,
+     data = age_graph, pch = 19, col = 'grey60', ylim = c(0,900)) + 
+  text(x = age_graph$어린이, y = age_graph$어린이집수, 
+       label = age_graph$시군구, pos = 3, col = 'blue')
+
+plot(formula = trans19 ~ 노년,
+     data = age_graph, pch = 19, col = 'grey60') + 
+  text(x = age_graph$노년, y = age_graph$trans19, 
+       label = age_graph$시군구, pos = 3, col = 'blue')
+
+plot(formula = 공원수 ~ 노년,
+     data = age_graph, pch = 19, col = 'grey60') + 
+  text(x = age_graph$노년, y = age_graph$공원수, 
+       label = age_graph$시군구, pos = 3, col = 'blue')
+
+plot(formula = 청소년 ~ 장년,
+     data = age_graph, pch = 19, col = 'grey60') + 
+  text(x = age_graph$장년, y = age_graph$청소년, 
+       label = age_graph$시군구, pos = 3, col = 'blue')
+
+plot(formula = trans19 ~ 총인구수,
+     data = age_graph, pch = 19, col = 'grey60') + 
+  text(x = age_graph$총인구수, y = age_graph$trans19, 
+       label = age_graph$시군구, pos = 3, col = 'blue')
+
+write.csv(x = age_graph, file = "age_graph19.csv")
+
+################################################################
+
+plot(formula = trans19 ~ 어린이집수,
+     data = age_graph, pch = 19, col = 'grey60') + 
+  text(x = age_graph$어린이집수, y = age_graph$trans19, 
+       label = age_graph$시군구, pos = 3, col = 'blue') +abline(v = mean(age_graph$어린이집수), h = mean(age_graph$trans19), col = 'red', lty = 2)
+
+reg <- lm(formula = trans19 ~ 어린이집수, data = age_graph)
+
+abline(reg = reg, col = 'darkgreen', lwd = 2)  # 19거래량과 어린이집수 산점도 회귀선추가
+
+##산점도 행렬 에 상관계수 추가
+
+pairs(x = age_graph[,2:12]) ##산점도 행렬
+
+panel.cor <- function(x,y){
+  par(usr = c(0,1,0,1))
+  corr <- cor(x = x, y = y, use = 'complete.obs') %>% round(digits = 2L)
+  text(x = 0.5, y = 0.5, labels = corr, cex = 2*abs(x = corr))
+}
+
+pairs(x = age_graph[, 2:12], upper.panel = panel.cor)
+
+
+###1인가구수 합친 산점도 행렬 / 
+graph_home <- apt_data_08vs19_0706[,c(2,5,6,7, 18:20)]
+
+pairs(x = graph_home[,c(2:7)])
+
+## 서대문구 그래프별로 평균에 들어가 있는지확인
+par(mfrow = c(2,2))
+
+barplot(as.matrix(age_graph$trans19), beside = T) + 
+axis(1, at = 1:length(age_graph$시군구), labels = age_graph$시군구, las =2) +
+abline(h = mean(age_graph$trans19), col = 'red') + title(ylab = '거래량')
+
+barplot(as.matrix(age_graph$공원수), beside = T) + 
+  axis(1, at = 1:length(age_graph$시군구), labels = age_graph$시군구, las =2) +
+  abline(h = mean(age_graph$공원수), col = 'red')+ title(ylab = '공원수')
+
+barplot(as.matrix(age_graph$어린이집수), beside = T) + 
+  axis(1, at = 1:length(age_graph$시군구), labels = age_graph$시군구, las =2) +
+  abline(h = mean(age_graph$어린이집수), col = 'red')+ title(ylab = '어린이집수')
+
+barplot(as.matrix(age_graph$총인구수), beside = T) + 
+  axis(1, at = 1:length(age_graph$시군구), labels = age_graph$시군구, las =2) +
+  abline(h = mean(age_graph$총인구수), col = 'red')+ title(ylab = '총인구수')
+
+barplot(as.matrix(age_graph$gap), beside = T) + 
+  axis(1, at = 1:length(age_graph$시군구), labels = age_graph$시군구, las =2) +
+  abline(h = mean(age_graph$gap), col = 'red')+ title(ylab = 'gap')
+
+barplot(as.matrix(apt_data_08vs19_0706$준공년도19), beside = T) + 
+  axis(1, at = 1:length(age_graph$시군구), labels = age_graph$시군구, las =2) +
+  abline(h = mean(apt_data_08vs19_0706$준공년도19), col = 'red')+ title(ylab = '19준공년도')##안나오와아아아아아아 
+
+
+
+fam_2019 <- read_xlsx(path = "C:/Users/junho/Documents/Nano degree/project/2019_fam.xlsx")
+fam_2010 <- read_xlsx(path = "C:/Users/junho/Documents/Nano degree/project/2010_fam.xlsx")
+apt_18 <- read_xlsx(path = "C:/Users/junho/Documents/Nano degree/project/2018_서울시 1인가구통계.xlsx")
+apt_10 <- read_xlsx(path = "C:/Users/junho/Documents/Nano degree/project/2010_서울시 1인가구.xlsx")
+
+apt_10 <- apt_10[,c(1,4)]
+apt_10 <- apt_10[-c(1),]
+apt_10 <- apt_10 %>% 
+  rename('시군구' = '자치구')
+
+apt_10 <- apt_10 %>% 
+  arrange(시군구)
+
+apt_data_08vs19_0706$아파트1인가구수10 <- apt_10$아파트
+apt_data_08vs19_0706$아파트1인가구수18 <- apt_18$아파트1인가구
+
+
+
+apt_18 <- apt_18[,c(1,4)]
+apt_18 <- apt_18[-c(1),]
+apt_18 <- apt_18 %>% 
+  rename('시군구' = '자치구')
+
+apt_18 <- apt_18 %>% 
+  arrange(시군구)
+
+apt_data_08vs19_0706 <- apt_data_08vs19_0706 %>% 
+  rename('아파트1인거주자증가' = '1인아파트거주자증가')
+
+
+apt_data_08vs19_0706$아파트1인가구수 <- apt_18$아파트1인가구
+apt_data_08vs19_0706 <- apt_data_08vs19_0706[,-c(18)]
+
+apt_data_08vs19_0706 <- apt_data_08vs19_0706 %>% 
+  mutate('1인아파트거주자증가' = apt_data_08vs19_0706$'1인아파트거주자18' - apt_data_08vs19_0706$'1인아파트거주자10')
+
+par(mfrow = c(1,1))
+
+plot(formula = 아파트1인거주자증가 ~ gap,
+     data = apt_data_08vs19_0706, pch = 19, col = 'grey60') + 
+  text(x = apt_data_08vs19_0706$gap, y = apt_data_08vs19_0706$아파트1인거주자증가, 
+       label = apt_data_08vs19_0706$시군구, pos = 3, col = 'blue')
+
+apt_data_08vs19_0706 <- apt_data_08vs19_0706[,-c(19,20)]
+
+fam_2010 <- fam_2010 %>% 
+  arrange(시군구)
+fam_2019 <- fam_2019 %>% 
+  arrange(시군구)
+
+apt_data_08vs19_0706$세대수10 <- fam_2010$세대수 
+apt_data_08vs19_0706$새대수19 <- fam_2019$세대수
+
+apt_data_08vs19_0706 <- apt_data_08vs19_0706 %>% 
+  mutate('세대수증감' = apt_data_08vs19_0706$'새대수19' - apt_data_08vs19_0706$'세대수10')
+
+apt_data_08vs19_0706 <- apt_data_08vs19_0706[,-c(19,20)]
+
+apt_data_08vs19_0706 <- apt_data_08vs19_0706 %>% 
+  mutate('거래차이' = apt_data_08vs19_0706$trans19 - apt_data_08vs19_0706$trans08)
