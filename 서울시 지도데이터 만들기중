@@ -27,7 +27,7 @@ seoul_map <- new_map[new_map$id <= 11740,]
 x_merge <- merge(seoul_map, x, by='id')
 
 
-plot <- ggplot() + geom_polygon(data = x_merge, aes(x = long, y = lat, group=group, fill=gap), color= 'black')
+```plot <- ggplot() + geom_polygon(data = x_merge, aes(x = long, y = lat, group=group, fill=gap), color= 'black')
 
 plot + scale_fill_gradient(low = "#ffe5e5", high = "#ff3232", space = "Lab", guide = "colourbar")
 
@@ -56,3 +56,4 @@ ggplot() +
             aes(x = long,
                 y = lat,
                 label = paste(시군구, gap, sep = "\n")))
+```
