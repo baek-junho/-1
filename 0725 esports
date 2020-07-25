@@ -1,0 +1,112 @@
+install.packages(&#39;miniUI&#39;)
+install.packages(&#39;shiny&#39;)
+install.packages(&#39;shinyFiles&#39;)
+devtools::install_github(&quot;bnosac/cronR&quot;)
+
+### ====
+## 토너먼트 아이디 불러오기
+tbl_tournaments_list &lt;- get_tournaments_list(api_key = pubg_api_key)
+selected_tournament_id &lt;- tbl_tournaments_list$id[28]
+
+## 경기 아이디 불러오기
+tbl_tournaments_matches_list &lt;- get_matches_id_from_tournaments(tournaments_id =
+selected_tournament_id,
+api_key = pubg_api_key)
+## 토너먼트 경기
+tbl_match_result &lt;- tbl_tournaments_matches_list %&gt;%
+mutate(map_name = pblapply(matchId,
+get_match_map_name,
+api_key = pubg_api_key),
+roster = pblapply(matchId,
+get_match_summary_roster,
+api_key = pubg_api_key),
+summary_stats = pblapply(matchId,
+get_match_summary_stats,
+api_key = pubg_api_key)) %&gt;%
+mutate(telemetry_path = pblapply(matchId,
+get_match_telemetry_url,
+api_key = pubg_api_key),
+telemetry = pblapply(telemetry_path,
+fromJSON))
+
+###===
+## 토너먼트 아이디 불러오기
+tbl_tournaments_list &lt;- get_tournaments_list(api_key = pubg_api_key)
+selected_tournament_id &lt;- tbl_tournaments_list$id[28]
+
+## 경기 아이디 불러오기
+tbl_tournaments_matches_list &lt;- get_matches_id_from_tournaments(tournaments_id =
+selected_tournament_id,
+api_key = pubg_api_key)
+## 토너먼트 경기
+tbl_match_result &lt;- tbl_tournaments_matches_list %&gt;%
+mutate(map_name = pblapply(matchId,
+get_match_map_name,
+api_key = pubg_api_key),
+roster = pblapply(matchId,
+get_match_summary_roster,
+api_key = pubg_api_key),
+summary_stats = pblapply(matchId,
+get_match_summary_stats,
+api_key = pubg_api_key)) %&gt;%
+mutate(telemetry_path = pblapply(matchId,
+get_match_telemetry_url,
+api_key = pubg_api_key),
+telemetry = pblapply(telemetry_path,
+fromJSON))
+
+tbl_match_result_detail &lt;- tbl_match_result %&gt;%
+mutate( shooting_detail_stats = pblapply(telemetry, get_player_shooting_detail),
+landing_location = pblapply(telemetry, get_landing_location),
+player_location = pblapply(telemetry, get_player_location),
+team_location = pblapply(telemetry, get_team_location),
+match_state = pblapply(telemetry, get_match_state))
+
+# list_map_list &lt;- pblapply(tbl_tournaments_matches_list$matchId,
+# get_match_map_name,
+# api_key = pubg_api_key)
+
+map_name &lt;- tbl_match_result_detail$map_name[[2]]
+team_location &lt;- tbl_match_result_detail$team_location[[2]]
+
+match_state &lt;- tbl_match_result_detail$match_state[[2]]
+plot_background &lt;- png::readPNG(str_c(&quot;img/map/2048/&quot;, map_name ,&quot;.png&quot;))
+if((map_name == &quot;Baltic_Main&quot;) | (map_name == &quot;Desert_Main&quot;)){
+map_max_size = 819200
+} else {
+map_max_size = 819200 / 2
+}
+plot_minimap &lt;- ggplot() +
+annotation_raster(plot_background, xmin = 0 , ymin = 0, xmax = map_max_size, ymax =
+map_max_size ) +
+xlim(0 , map_max_size) +
+ylim(0 , map_max_size) +
+theme(panel.grid = element_blank(),
+axis.text = element_blank(),
+axis.ticks = element_blank())
+tbl_poison_gas_location &lt;- match_state %&gt;%
+group_by(isGame) %&gt;%
+filter(row_number() == n()) %&gt;%
+filter(isGame %% 1 == 0) %&gt;%
+ungroup() %&gt;%
+mutate(poison_location_y = 819200 - poison_location_y) %&gt;%
+select(poison_location_x, poison_location_y, poison_location_radius)
+
+for (i in 1:nrow(tbl_poison_gas_location)){
+plot_poison_gas &lt;- geom_path(data =
+draw_circle(c(tbl_poison_gas_location$poison_location_x[i],
+tbl_poison_gas_location$poison_location_y[i]),
+tbl_poison_gas_location$poison_location_radius[i] ,npoints =
+100),
+aes(x = x,y = y), size = 0.5, linetype = 1, alpha = 0.8, color = &quot;white&quot;)
+plot_minimap &lt;- plot_minimap + plot_poison_gas
+}
+display_team_moving_status &lt;- team_location %&gt;%
+mutate(location_y = 819200 - location_y)
+plot_team_moving_status &lt;- geom_path(data = display_team_moving_status,
+
+aes(x = location_x, y = location_y, colour = team_name), size = 1,
+linetype = 1, alpha = 1,
+arrow = arrow(type = &quot;open&quot;, angle = 30, length = unit(0.1, &quot;inches&quot;)))
+
+output &lt;- plot_minimap + plot_team_moving_status
