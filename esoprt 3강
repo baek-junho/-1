@@ -1,0 +1,71 @@
+pubg_api_key &lt;-
+&quot;eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI4MzQyN2YzMC05Y2ZmLTAxMzgt
+MzlmMS0xYmJkOWE0ZjQyNzEiLCJpc3MiOiJnYW1lbG9ja2VyIiwiaWF0IjoxNTkzNTIxOTkyL
+CJwdWIiOiJibHVlaG9sZSIsInRpdGxlIjoicHViZyIsImFwcCI6Imp1bmdod2FuLWFsZnJlIn0.5k
+CBiEQehbtYn2zg_SYdel0vnU6m1V4VKN3rRJMk-k8&quot;
+tbl_tournaments &lt;- get_tournaments_list(api_key = pubg_api_key)
+tbl_tournaments_matches &lt;- get_matches_id_from_tournaments(tournaments_id =
+tbl_tournaments$id[26],
+api_key = pubg_api_key)
+tbl_matches_roster &lt;- get_match_summary_roster(match_id =
+tbl_tournaments_matches$matchId[1],
+api_key = pubg_api_key)
+tbl_matches_summary_stats &lt;- get_match_summary_stats(match_id =
+tbl_tournaments_matches$matchId[1],
+api_key = pubg_api_key)
+
+## for loop
+tbl_whole_summary_stats &lt;- tibble()
+for(i in 1:length(tbl_tournaments_matches$matchId)){
+
+tbl_matches_summary_stats &lt;- get_match_summary_stats(match_id =
+tbl_tournaments_matches$matchId[i],
+api_key = pubg_api_key)
+# 전체데이터에 덮어쓰기
+tbl_whole_summary_stats &lt;- bind_rows(tbl_whole_summary_stats,
+tbl_matches_summary_stats)
+
+}
+## for loop - list()
+list_whole_summary_stats &lt;- list()
+for(i in 1:length(tbl_tournaments_matches$matchId)){
+
+tbl_matches_summary_stats &lt;- get_match_summary_stats(match_id =
+tbl_tournaments_matches$matchId[i],
+api_key = pubg_api_key)
+# 전체데이터에 덮어쓰기
+list_whole_summary_stats &lt;- append(list_whole_summary_stats,
+list(tbl_matches_summary_stats))
+Sys.sleep(1)
+}
+tbl_whole_summary_stats &lt;- list_whole_summary_stats %&gt;%
+bind_rows()
+list_whole_summary_stats &lt;- pblapply(tbl_tournaments_matches$matchId,
+get_match_summary_stats,
+api_key = pubg_api_key)
+
+tbl_whole_summary_stats %&gt;%
+group_by(playerName) %&gt;%
+summarise(total_damage = sum(damageDealt)) %&gt;%
+arrange(playerName)
+
+tbl_whole_summary_stats %&gt;%
+group_by(playerName) %&gt;%
+summarise(total_damage = sum(damageDealt),
+avg_damage = mean(damageDealt, na.rm = TRUE)) %&gt;%
+arrange(desc(total_damage))
+
+tbl_whole_summary_stats %&gt;%
+group_by(playerName) %&gt;%
+summarise(total_damage = sum(damageDealt),
+avg_damage = mean(damageDealt, na.rm = TRUE),
+play = n()) %&gt;%
+arrange(desc(avg_damage))
+
+tbl_whole_summary_stats %&gt;%
+group_by(playerName) %&gt;%
+summarise(total_damage = sum(damageDealt),
+avg_damage = mean(damageDealt, na.rm = TRUE),
+play = n()) %&gt;%
+filter(play &gt;= 20) %&gt;%
+arrange(desc(avg_damage))
